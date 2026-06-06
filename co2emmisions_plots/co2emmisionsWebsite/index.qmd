@@ -21,18 +21,11 @@ createCountryBubbleGraph(y_var='co2_per_capita', x_var='gdp_per_capita')
 ```{r}
 library(htmltools)
 
-# Read the HTML file
-plotly_html <- includeHTML("/Users/edbaker/UN_projects/c02emmisions/co2emmisionsWebsite/plotly_animation.html")
-
-# render in UI
-shiny::fluidPage(
-  tags$iframe(
-    src = "/Users/edbaker/UN_projects/c02emmisions/co2emmisionsWebsite/plotly_animation.html",
-    width = "100%",  # Adjust width here (e.g., "100%" or "800px")
-    height = "800px",  # Adjust height here (e.g., "800px")
-    frameborder = 0,
-    scrolling = "no"
-  )
+tags$iframe(
+  src = "plotly_animation.html",
+  width = "100%",
+  height = "800px",
+  frameborder = 0,
+  scrolling = "no"
 )
-
 ```

@@ -1,24 +1,11 @@
-#. %reset -f
-
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 from pathlib import Path
-#from plotly.subplots import make_subplots
-#import copy
 import time
 import math
 import statsmodels.api as sm
-import moviepy.editor as mpy
-import io
-from PIL import Image
-import cv2
-
-from guppy import hpy
-
-# Create a heap object to track memory usage
-hp = hpy()
 
 def weighted_percentile(values, weights, percentile): #values = plot_df[y_var][index_max_y]; weights=plot_df['pop'][index_max_y]; percentile=95
     """Compute the weighted percentile of a given list of values."""
@@ -186,15 +173,15 @@ def createCountryBubbleGraph(datasource="GCP and Maddison",
     #data = pd.read_csv(open_url('https://github.com/bakered/co2emmisions/blob/main/src_shiny_app/dataPlot1.csv'))
     if datasource == "GCP and Maddison":
         if geographyLevel == "countries":
-            infile = Path(__file__).parent / "data" / "dataCountries.csv"
+            infile = Path(__file__).parent / "dataCountries.csv"
         else:
-            infile = Path(__file__).parent / "data" / "dataRegions.csv"
+            infile = Path(__file__).parent / "dataRegions.csv"
             print(infile)
     else:
         if geographyLevel == "countries":
-            infile = Path(__file__).parent / "data" / "dataWDICountries.csv"
+            infile = Path(__file__).parent / "dataWDICountries.csv"
         else:
-            infile = Path(__file__).parent / "data" / "dataWDIRegions.csv"
+            infile = Path(__file__).parent / "dataWDIRegions.csv"
     data = pd.read_csv(infile)
     data['region1'] = pd.Categorical(data['region1'], categories=region1s, ordered=True)
     data['year'] = data['year'].astype(int)
@@ -323,12 +310,14 @@ def createCountryBubbleGraph(datasource="GCP and Maddison",
     #geography_list=['ARG', 'AUS', 'BRA', 'CAN', 'CHN', 'FRA', 'DEU', 'IND', 'IDN', 'ITA', 'JPN', 'MEX', 'RUS', 'SAU', 'ZAF', 'KOR', 'TUR', 'GBR', 'USA', 'SGP', 'PNG', 'MYS', 'BRN', 'IRN', 'OMN']
     
     
-    ########## CALCULATE VALUES 
-    # Calculate weighted 95% percentile
-    index_max_x = plot_df.groupby(geography)[x_var].idxmax().dropna()
-    index_max_y = plot_df.groupby(geography)[y_var].idxmax().dropna()
-    max_x = weighted_percentile(plot_df[x_var][index_max_x], plot_df['pop'][index_max_x], 95) # plot_df[x_var].max() * 1.2
-    max_y = weighted_percentile(plot_df[y_var][index_max_y], plot_df['pop'][index_max_y], 95) # plot_df[y_var].max() * 1.2
+    ########## CALCULATE VALUES
+    # Calculate weighted 95% percentile (filter NaN rows first — pandas 2.0 raises on all-NaN groups)
+    valid_x = plot_df[plot_df[x_var].notna()]
+    valid_y = plot_df[plot_df[y_var].notna()]
+    index_max_x = valid_x.groupby(geography)[x_var].idxmax().dropna()
+    index_max_y = valid_y.groupby(geography)[y_var].idxmax().dropna()
+    max_x = weighted_percentile(valid_x[x_var][index_max_x], valid_x['pop'][index_max_x], 95)
+    max_y = weighted_percentile(valid_y[y_var][index_max_y], valid_y['pop'][index_max_y], 95)
     
     
     def find_dtick(max_y): #max_y=50
@@ -482,11 +471,6 @@ def createCountryBubbleGraph(datasource="GCP and Maddison",
                                additional_cols = additional_cols
                                )
    
-    
-    plot_df.to_csv('/Users/edbaker/UN_projects/c02emmisions/plot_df.csv')
-    
-    # print(hp.heap())
-    print(hp.heap())
     
     ########## CREATE SCATTER PLOT
     if geographyLevel == "countries":
@@ -756,8 +740,6 @@ def createCountryBubbleGraph(datasource="GCP and Maddison",
         fig = figScatter
     figScatter = None
     figLine = None
-    
-    print(hp.heap())
     
     ########## CHANGE CUSTOM SETTINGS
     progress.set(50, "custom settings...")
@@ -1121,143 +1103,5 @@ def createCountryBubbleGraph(datasource="GCP and Maddison",
   
     if width != "default":
         fig.update_layout(width=int(width), height=int(height))
-    
-        
-    def plotly_fig2array(fig):
-       fig_bytes = fig.to_image(format="png")
-       buf = io.BytesIO(fig_bytes)
-       img = Image.open(buf)
-       return np.asarray(img)
-   
-    animation_duration = length  # seconds for the entire animation
-   
-    from copy import deepcopy
-    
-   # Function to update the figure for each frame and return an image array
-    def make_frame(t):
-       print("t= " + str(t))
-       # Get the current frame based on time 't' (frames are sequentially spaced)
-      # print(hp.heap())
-       current_frame = int(t * len(fig.frames)/animation_duration)  # Scales time 't' to the number of frames
-       if current_frame > len(fig.frames)-1:
-           current_frame = len(fig.frames)-1
-       
-       print("frame data xxxxxxxxxxxxxxxxxxxxxxxxxx") 
-       print(fig.frames[current_frame].data)
-       print("fig data xxxxxxxxxxxxxxxxxxxxxxxxxxx")
-       print(fig.data) 
-       
-       # Update the figure with the data of the current frame
-       figFrame = go.Figure()
-       # Loop through each trace in the current frame's data
-       for trace_index, trace_template in enumerate(fig.data):
-            # Deep copy the trace from fig.data to avoid modifying the original trace
-            new_trace = deepcopy(trace_template)
-            # Step 2: Update the x, y, and marker size according to the current frame's data
-            if trace_index < len(fig.frames[current_frame].data):  # Check if the frame has this trace
-                frame_trace_data = fig.frames[current_frame].data[trace_index]
-                # Update positions and marker sizes
-                new_trace.update({
-                    'x': frame_trace_data['x'],             # Update x values
-                    'y': frame_trace_data['y'],             # Update y values
-                    'marker.size': frame_trace_data['marker.size']  # Update marker size
-                })
-            
-                # Add the updated trace to figFrame
-                figFrame.add_trace(new_trace)
-            
-            
-       figFrame.update_layout(fig.layout)
-       figFrame.update_layout(fig.frames[current_frame].layout)
-      # fig.update_layout(updatemenus=[], sliders=[])  # Remove buttons and sliders
-       figFrame.layout.sliders[0].visible=False
-       figFrame.layout.updatemenus[0].buttons[0].visible=False
-       figFrame.layout.updatemenus[0].buttons[1].visible=False
-       
-       # Convert the updated figure to an array (image) and return it
-       return plotly_fig2array(figFrame)
-   
-    
-    if download == "png":
-        final_frame = make_frame(animation_duration)
-    
-        # Save the final frame as a PNG file
-        png_path = filename #'/Users/edbaker/UN_projects/c02emmisions/final_frame.png'
-        Image.fromarray(final_frame).save(png_path)
-   
-   
-   
-    if download != "nothing":
-        print(hp.heap())
-        # Function to convert a Plotly figure to an image array
 
-        print("attempt videoclip")
-        # Create a MoviePy video clip using the `make_frame` function
-        animation = mpy.VideoClip(make_frame, duration=animation_duration)
-        
-        print(hp.heap())
-        print("delete fig")
-       # fig = None
-        print(hp.heap())
-        print(type(animation))
-
-
-    if download=="mp4":
-        print("attempt mp4")
-        
-        
-
-        # Get the dimensions of the frame
-        frame_shape = animation.get_frame(0).shape
-        frame_height, frame_width, _ = frame_shape
-        print(frame_shape)
-        
-        print("writing " + filename)
-        # Define the video writer
-        out = cv2.VideoWriter(filename, cv2.VideoWriter_fourcc(*'mp4v'), fps, (frame_width, frame_height))
-        
-        print(hp.heap())
-        
-        print("for loop")
-        # Write each frame to the video file
-        for i in range(int(animation.duration * fps)):  
-            print(i)
-            frame = animation.get_frame(i / fps)
-            out.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))  # Convert from RGB to BGR (for OpenCV)
-        
-        # Release the video writer
-        out.release()
-       # print(hp.heap())
-        
-    if download=="gif":
-        print("writing " + filename)
-        # Write the animation to a GIF
-        animation.write_gif(filename, fps=fps)
-       # print(hp.heap())
-        
-    if False:
-        # write to video
-        animation.write_videofile("/Users/edbaker/UN_projects/c02emmisions/plotly_animation2.mp4", fps=fps, codec="mpeg4", temp_audiofile="temp_audiofilexxxx")
-        animation.write_videofile("/Users/edbaker/UN_projects/c02emmisions/plotly_animation3.webm",audio=False, fps=fps)
-
-        # Directory to save individual frames
-        import os 
-        
-        output_dir = "frames"
-        os.makedirs(output_dir, exist_ok=True)
-        
-        # Save each frame as an image
-        for i in range(int(animation.duration * fps)):  # Assuming 24 FPS
-            frame = animation.get_frame(i / fps)  # Get frame at the given time
-            frame_img = Image.fromarray(frame)
-            frame_img.save(f"{output_dir}/frame_{i:04d}.png")
-            
-            
-            
-        
-    
-    return(fig)
-    
-#fig = createCountryBubbleGraph()    
-# Save the figure as HTML
-#fig.write_html('/Users/edbaker/UN_projects/c02emmisions/plotly_animation.html')
+    return fig

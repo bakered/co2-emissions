@@ -55,7 +55,7 @@ maddison = maddison %>%
 
 
 #### GLOBAL CARBON PROJECT
-co2_full <- read.csv("~/UN_projects/c02emmisions/GCB2024v17_MtCO2_flat.csv")
+co2_full <- read.csv("GCB2024v17_MtCO2_flat.csv")
 co2_full = co2_full %>% 
   rename(
     c(country = Country, 
@@ -229,8 +229,8 @@ data = data %>% filter(year>1820)
 
 write.csv(data, "dataCountries.csv", row.names = FALSE)
 write.csv(regions_data, "dataRegions.csv", row.names = FALSE)
-write.csv(data, "/Users/edbaker/UN_projects/c02emmisions/co2emmisions/src_shiny_app/data/dataCountries.csv", row.names = FALSE)
-write.csv(regions_data, "/Users/edbaker/UN_projects/c02emmisions/co2emmisions/src_shiny_app/data/dataRegions.csv", row.names = FALSE)
+write.csv(data, "../co2emmisions_shinyapp/src_shiny_app/data/dataCountries.csv", row.names = FALSE)
+write.csv(regions_data, "../co2emmisions_shinyapp/src_shiny_app/data/dataRegions.csv", row.names = FALSE)
 
 
 static2022_countries = data %>% filter(year==2022, !is.na(gdp_per_capita), !is.na(co2_per_capita)) %>% select(ISO3, gdp_per_capita, co2_per_capita, co2, region1)
