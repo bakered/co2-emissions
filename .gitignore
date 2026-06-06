@@ -1,0 +1,66 @@
+# ----- Generated HTML outputs (large, regenerate locally) -----
+*.html
+!co2emmisionsWebsite/_site/**/*.html
+!animated_chart/animation.html
+
+# ----- Local notes -----
+TODO_NOTES.html
+
+# ----- Video / image outputs -----
+*.mp4
+*.webm
+*.gif
+*.png
+final_frame.png
+
+# ----- R -----
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj.user
+*.RData
+gdp_forecasts/growth_dfs/
+
+# ----- Python -----
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+env/
+venv/
+
+# ----- Quarto generated output -----
+co2emmisionsWebsite/_site/
+co2emmisionsWebsite/.quarto/
+*_files/
+
+# ----- Large raw data files (download separately) -----
+gdp_forecasts/WEOOct2024all.csv
+gdp_forecasts/WEOOct2024all.xls
+
+# ----- Compressed archives -----
+*.7z
+*.zip
+
+# ----- OS -----
+.DS_Store
+Thumbs.db
+
+# ----- Lock files -----
+.~lock.*
+
+# ----- Claude Code session data -----
+.claude/
+
+# ----- Shiny app (separate repo: github.com/bakered/co2emmisions) -----
+co2emmisions/
+
+# ----- Node (Shiny app) -----
+node_modules/
+package-lock.json
+
+# ----- libs (Quarto/R generated JS/CSS bundles) -----
+libs/
+
+# ----- Vendored JS libraries (use CDN instead) -----
+animated_chart/plotly-*.min.js
