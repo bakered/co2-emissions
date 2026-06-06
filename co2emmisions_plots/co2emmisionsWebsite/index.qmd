@@ -1,0 +1,38 @@
+---
+title: "co2emmisionsDataExplorer"
+---
+
+This is a Quarto website.ffffff To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+
+```{bash}
+python ../PlotlyPlot1.py
+```
+
+
+```{python}
+import sys
+import os
+sys.path.insert(0, os.path.abspath('..'))  # Add parent directory to path
+from PlotlyPlot1 import createCountryBubbleGraph
+createCountryBubbleGraph(y_var='co2_per_capita', x_var='gdp_per_capita')
+```
+
+
+```{r}
+library(htmltools)
+
+# Read the HTML file
+plotly_html <- includeHTML("/Users/edbaker/UN_projects/c02emmisions/co2emmisionsWebsite/plotly_animation.html")
+
+# render in UI
+shiny::fluidPage(
+  tags$iframe(
+    src = "/Users/edbaker/UN_projects/c02emmisions/co2emmisionsWebsite/plotly_animation.html",
+    width = "100%",  # Adjust width here (e.g., "100%" or "800px")
+    height = "800px",  # Adjust height here (e.g., "800px")
+    frameborder = 0,
+    scrolling = "no"
+  )
+)
+
+```

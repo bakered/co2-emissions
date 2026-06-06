@@ -1,0 +1,6 @@
+build:
+  docker:
+    web: Dockerfile  # Specify the Dockerfile if it's not named Dockerfile
+
+run:
+  web: uvicorn src_shiny_app.app:app --host 0.0.0.0 --port ${PORT:-8000}

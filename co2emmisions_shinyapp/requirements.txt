@@ -1,0 +1,12 @@
+moviepy==1.0.3
+numpy==1.24.4
+opencv_python==4.10.0.84
+pandas==2.0.3
+Pillow==11.0.0
+plotly==5.24.0
+shiny==1.1.0
+statsmodels==0.14.1
+uvicorn==0.30.6
+kaleido==0.2.1
+opencv-python==4.10.0.84
+guppy3==3.1.4
